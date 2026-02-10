@@ -1,0 +1,400 @@
+<template>
+  <div class="page">
+    <list class="scroll-container">
+      <!-- 管理模式头部 -->
+      <list-item type="header" class="header-item">
+        <stack class="manage-header">
+          <image class="manage-header-bg" src="/assets/img/shoujibizhi-bg-2.png"></image>
+          <div class="manage-header-content">
+            <div class="back-btn" onclick="goBack">
+              <image class="back-icon" src="/assets/img/back.png"></image>
+            </div>
+            <text class="manage-title">批量管理</text>
+            <text class="manage-count">已选择 {{selectedCount}} 张</text>
+          </div>
+        </stack>
+      </list-item>
+
+      <!-- 图片列表 -->
+      <list-item type="content" class="content-item">
+        <div class="image-grid">
+          <div class="grid-item" for="{{displayData}}" onclick="onImageClick($idx, $item)">
+            <stack class="item-stack">
+              <image class="{{tabIndex === 0 ? 'image-wallpaper' : 'image-avatar'}}" src="{{$item.url}}"></image>
+              <image class="select-icon" src="{{$item.selected ? '/assets/img/xuanze.png' : '/assets/img/weixuanze.png'}}"></image>
+            </stack>
+          </div>
+        </div>
+      </list-item>
+
+      <!-- 底部留白 -->
+      <list-item type="footer" class="footer-spacer"></list-item>
+    </list>
+
+    <!-- 底部批量取消按钮 -->
+    <div class="bottom-bar">
+      <div class="delete-btn" onclick="onDeleteClick">
+        <image class="delete-icon" src="/assets/img/shanchu.png"></image>
+        <text class="delete-text">取消收藏</text>
+      </div>
+    </div>
+    
+    <!-- 确认删除弹窗 -->
+    <div class="dialog-mask" if="{{showDeleteDialog}}">
+      <div class="dialog-container">
+        <text class="dialog-title">是否要取消收藏所选图片？</text>
+        <div class="dialog-btn-group">
+          <div class="dialog-btn cancel-btn" onclick="cancelDelete">
+            <text class="cancel-text">返回</text>
+          </div>
+          <div class="dialog-btn confirm-btn" onclick="confirmDelete">
+            <text class="confirm-text">确定</text>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import storage from '@system.storage'
+import router from '@system.router'
+import prompt from '@system.prompt'
+
+export default {
+  protected: {
+    currentTab: '0'
+  },
+  private: {
+    listData: [],
+    displayData: [],
+    selectedCount: 0,
+    tabIndex: 0,
+    showDeleteDialog: false
+  },
+  onInit() {
+    this.tabIndex = parseInt(this.currentTab) || 0
+    this.loadFavorites()
+  },
+  goBack() {
+    router.back()
+  },
+  loadFavorites() {
+    const self = this
+    storage.get({
+      key: 'favorites',
+      success: function(data) {
+        if (data) {
+          try {
+            self.listData = JSON.parse(data)
+            self.filterData()
+          } catch (e) {
+            self.listData = []
+            self.displayData = []
+          }
+        } else {
+          self.listData = []
+          self.displayData = []
+        }
+      },
+      fail: function() {
+        self.listData = []
+        self.displayData = []
+      }
+    })
+  },
+  filterData() {
+    const type = this.tabIndex === 0 ? 'wallpaper' : 'avatar'
+    const arr = []
+    for (var i = 0; i < this.listData.length; i++) {
+      if (this.listData[i].type === type) {
+        arr.push({
+          url: this.listData[i].url,
+          tag: this.listData[i].tag || '',
+          type: this.listData[i].type,
+          selected: false
+        })
+      }
+    }
+    this.displayData = arr
+    this.selectedCount = 0
+  },
+  onImageClick(index, item) {
+    var arr = []
+    for (var i = 0; i < this.displayData.length; i++) {
+      if (i === index) {
+        arr.push({
+          url: this.displayData[i].url,
+          tag: this.displayData[i].tag,
+          type: this.displayData[i].type,
+          selected: !this.displayData[i].selected
+        })
+      } else {
+        arr.push(this.displayData[i])
+      }
+    }
+    this.displayData = arr
+    var count = 0
+    for (var j = 0; j < this.displayData.length; j++) {
+      if (this.displayData[j].selected) {
+        count++
+      }
+    }
+    this.selectedCount = count
+  },
+  onDeleteClick() {
+    if (this.selectedCount === 0) {
+      prompt.showToast({ message: '请先选择图片' })
+      return
+    }
+    this.showDeleteDialog = true
+  },
+  cancelDelete() {
+    this.showDeleteDialog = false
+  },
+  confirmDelete() {
+    this.showDeleteDialog = false
+    this.executeDelete()
+  },
+  executeDelete() {
+    var selectedUrls = []
+    for (var i = 0; i < this.displayData.length; i++) {
+      if (this.displayData[i].selected) {
+        selectedUrls.push(this.displayData[i].url)
+      }
+    }
+
+    var type = this.tabIndex === 0 ? 'wallpaper' : 'avatar'
+    var newList = []
+    for (var j = 0; j < this.listData.length; j++) {
+      var item = this.listData[j]
+      if (item.type === type && selectedUrls.indexOf(item.url) !== -1) {
+        continue
+      }
+      newList.push(item)
+    }
+    this.listData = newList
+
+    var self = this
+    storage.set({
+      key: 'favorites',
+      value: JSON.stringify(this.listData),
+      success: function() {
+        prompt.showToast({ message: '已取消收藏' })
+        self.filterData()
+      },
+      fail: function() {
+        prompt.showToast({ message: '操作失败' })
+      }
+    })
+  }
+}
+</script>
+
+<style>
+.page {
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  background-color: #ffffff;
+}
+
+.scroll-container {
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+}
+
+.header-item {
+  width: 100%;
+  height: 120px;
+  margin-top: -25px;
+  margin-bottom: -50px;
+}
+
+.manage-header {
+  width: 100%;
+  height: 100%;
+}
+
+.manage-header-bg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.manage-header-content {
+  width: 100%;
+  height: 100%;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 15px;
+}
+
+.back-btn {
+  width: 30px;
+  height: 30px;
+  justify-content: center;
+  align-items: center;
+}
+
+.back-icon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+.manage-title {
+  font-size: 12px;
+  color: #333333;
+  font-weight: bold;
+}
+
+.manage-count {
+  font-size: 9px;
+  color: #666666;
+}
+
+.content-item {
+  width: 100%;
+}
+
+.image-grid {
+  width: 100%;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  padding: 10px 12px 0px;
+}
+
+.grid-item {
+  width: 48%;
+  margin-bottom: 10px;
+  flex-direction: column;
+  border-radius: 8px;
+}
+
+.item-stack {
+  width: 100%;
+}
+
+.image-wallpaper {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.image-avatar {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.select-icon {
+  width: 16px;
+  height: 16px;
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+}
+
+.footer-spacer {
+  width: 100%;
+  height: 70px;
+}
+
+.bottom-bar {
+  position: fixed;
+  bottom: 20px;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+  padding: 0 16px;
+}
+
+.delete-btn {
+  width: 100%;
+  height: 44px;
+  background-color: #ff3333;
+  border-radius: 22px;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.delete-icon {
+  width: 12px;
+  height: 12px;
+  margin-right: 8px;
+}
+
+.delete-text {
+  font-size: 14px;
+  color: #ffffff;
+}
+
+/* 弹窗样式 */
+.dialog-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  justify-content: center;
+  align-items: center;
+}
+
+.dialog-container {
+  width: 240px;
+  background: linear-gradient(to bottom, #ffe4e1 0%, #ffffff 50%);
+  border-radius: 12px;
+  flex-direction: column;
+  padding: 24px;
+  align-items: center;
+}
+
+.dialog-title {
+  font-size: 10px;
+  color: #333333;
+  margin-bottom: 24px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.dialog-btn-group {
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.dialog-btn {
+  width: 80px;
+  height: 32px;
+  border-radius: 16px;
+  justify-content: center;
+  align-items: center;
+}
+
+.cancel-btn {
+  border: 1px solid #333333;
+  background-color: #ffffff;
+}
+
+.confirm-btn {
+  background-color: #ff3333;
+}
+
+.cancel-text {
+  font-size: 10px;
+  color: #333333;
+}
+
+.confirm-text {
+  font-size: 10px;
+  color: #ffffff;
+}
+</style>

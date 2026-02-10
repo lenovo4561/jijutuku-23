@@ -1,0 +1,328 @@
+<template>
+  <div class="page">
+    <stack class="stack-container">
+      <!-- 背景图片 - 当前头像的模糊效果 -->
+      <image class="page-bg" src="{{currentImageUrl}}"></image>
+
+      <!-- 主头像图片Container -->
+      <div class="main-image-container">
+        <image class="main-avatar" src="{{currentImageUrl}}"></image>
+      </div>
+
+      <!-- 顶部返回按钮 -->
+      <div class="back-btn" onclick="goBack">
+        <image class="back-icon" src="/assets/img/back.png"></image>
+      </div>
+
+      <!-- 底部操作栏-->
+      <div class="bottom-bar">
+        <!-- 下载按钮 -->
+        <div class="action-btn download-btn" onclick="handleDownload">
+          <image class="btn-icon" src="/assets/img/xiazai.png"></image>
+          <text class="btn-text">下载</text>
+        </div>
+        
+        <!-- 收藏按钮 -->
+        <div class="action-btn like-btn" onclick="handleLike">
+          <image class="btn-icon" src="{{isLiked ? '/assets/img/like-s.png' : '/assets/img/like-u.png'}}"></image>
+          <text class="btn-text">{{isLiked ? '已收藏' : '收藏'}}</text>
+        </div>
+      </div>
+    </stack>
+  </div>
+</template>
+
+<script>
+import router from '@system.router'
+import prompt from '@system.prompt'
+import storage from '@system.storage'
+import request from '@system.request'
+import media from '@system.media'
+
+export default {
+  protected: {
+    imageUrl: '',
+    tag: ''
+  },
+  private: {
+    currentImageUrl: '',
+    isLiked: false
+  },
+  onInit() {
+    console.log('=== Avatar Detail Page onInit ===')
+    
+    if (this.imageUrl) {
+      this.currentImageUrl = this.imageUrl
+      console.log('Loaded avatar:', this.imageUrl)
+    }
+    
+    this.checkIfLiked()
+  },
+  goBack() {
+    router.back()
+  },
+  handleDownload() {
+    const self = this
+    
+    if (!this.currentImageUrl) {
+      prompt.showToast({
+        message: '暂无图片下载'
+      })
+      return
+    }
+    
+    prompt.showToast({
+      message: '开始下载...'
+    })
+    
+    const encodedUrl = this.currentImageUrl.replace(/\s/g, '%20')
+    
+    request.download({
+      url: encodedUrl,
+      success: function(data) {
+        console.info('Download success, token:', data.token)
+        request.onDownloadComplete({
+          token: data.token,
+          success: function(ret) {
+            console.info('Download complete, path:', ret.uri)
+            media.saveToPhotosAlbum({
+              uri: ret.uri,
+              success: function() {
+                prompt.showToast({
+                  message: '下载成功'
+                })
+              },
+              fail: function(data, code) {
+                console.error('Save to album failed:', data, code)
+                prompt.showToast({
+                  message: '保存失败，请检查权限'
+                })
+              }
+            })
+          },
+          fail: function(data, code) {
+            console.error('Download complete check failed:', data, code)
+            prompt.showToast({
+              message: '下载失败'
+            })
+          }
+        })
+      },
+      fail: function(data, code) {
+        console.error('Download request failed:', data, code)
+        prompt.showToast({
+          message: '下载请求失败: ' + code
+        })
+      }
+    })
+  },
+  checkIfLiked() {
+    const self = this
+    if (!this.currentImageUrl) {
+      self.isLiked = false
+      return
+    }
+    storage.get({
+      key: 'favorites',
+      success: function(data) {
+        if (data) {
+          try {
+            const favorites = JSON.parse(data)
+            self.isLiked = favorites.some(function(item) {
+              return item.url === self.currentImageUrl && item.type === 'avatar'
+            })
+          } catch (e) {
+            self.isLiked = false
+          }
+        }
+      },
+      fail: function() {
+        self.isLiked = false
+      }
+    })
+  },
+  handleLike() {
+    const self = this
+    if (!this.currentImageUrl) {
+      prompt.showToast({
+        message: '图片信息不完整'
+      })
+      return
+    }
+    
+    const itemUrl = this.currentImageUrl
+    const itemTag = this.tag || '头像'
+    
+    storage.get({
+      key: 'favorites',
+      success: function(data) {
+        let favorites = []
+        if (data) {
+          try {
+            favorites = JSON.parse(data)
+          } catch (e) {
+            favorites = []
+          }
+        }
+
+        if (self.isLiked) {
+          favorites = favorites.filter(function(item) {
+            return !(item.url === itemUrl && item.type === 'avatar')
+          })
+          self.isLiked = false
+          prompt.showToast({
+            message: '已取消收藏'
+          })
+        } else {
+          const newItem = {
+            url: itemUrl,
+            tag: itemTag,
+            type: 'avatar'
+          }
+          favorites.push(newItem)
+          self.isLiked = true
+          prompt.showToast({
+            message: '已添加到收藏'
+          })
+        }
+
+        storage.set({
+          key: 'favorites',
+          value: JSON.stringify(favorites),
+          success: function() {
+            console.log('收藏保存成功')
+          },
+          fail: function(err) {
+            console.log('收藏保存失败:', err)
+          }
+        })
+      },
+      fail: function() {
+        const favorites = [
+          {
+            url: itemUrl,
+            tag: itemTag,
+            type: 'avatar'
+          }
+        ]
+        storage.set({
+          key: 'favorites',
+          value: JSON.stringify(favorites),
+          success: function() {
+            console.log('收藏保存成功')
+          },
+          fail: function(err) {
+            console.log('收藏保存失败:', err)
+          }
+        })
+        self.isLiked = true
+        prompt.showToast({
+          message: '已添加到收藏'
+        })
+      }
+    })
+  }
+}
+</script>
+
+<style>
+.page {
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  background-color: #000000;
+}
+
+.stack-container {
+  width: 100%;
+  height: 100%;
+}
+
+.page-bg {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  filter: blur(50px);
+  opacity: 0.6;
+  object-fit: cover;
+}
+
+.main-image-container {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  justify-content: center;
+  align-items: center;
+}
+
+.main-avatar {
+  width: 250px;
+  height: 250px;
+  object-fit: contain;
+}
+
+.back-btn {
+  position: absolute;
+  top: 35px;
+  left: 15px;
+  width: 18px;
+  height: 18px;
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 16px;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+}
+
+.back-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.bottom-bar {
+  position: absolute;
+  bottom: 15px;
+  left: 0;
+  width: 100%;
+  padding-left: 20px;
+  padding-right: 20px;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+}
+
+.action-btn {
+  width: 110px;
+  height: 34px;
+  border-radius: 17px;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.download-btn {
+  background-color: #55acfa;
+  margin-right: 15px;
+}
+
+.like-btn {
+  background-color: #ff3344;
+}
+
+.btn-icon {
+  width: 14px;
+  height: 14px;
+  margin-right: 5px;
+}
+
+.btn-text {
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: bold;
+}
+</style>

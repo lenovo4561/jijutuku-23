@@ -1,0 +1,122 @@
+<template>
+  <div class="webview-page">
+    <web
+      src="{{url}}"
+      id="web"
+      class="web-content"
+      allowthirdpartycookies="true"
+      onpagefinish="onPageFinish"
+      onpagestart="onPageStart"
+      onerror="onError"
+    >
+    </web>
+  </div>
+</template>
+
+<script>
+import router from '@system.router'
+
+export default {
+  data() {
+    return {
+      title: '',
+      url: '',
+      isBacking: false
+    }
+  },
+
+  onInit() {
+    if (this.title) {
+      try {
+        this.$page.setTitleBar({ text: this.title })
+      } catch (e) {
+
+      }
+    }
+  },
+
+  onBackPress() {
+
+    if (this.isBacking) {
+      return true
+    }
+    this.isBacking = true
+
+    const webElement = this.$element('web')
+    if (webElement) {
+      webElement.canBack({
+        callback: (canBack) => {
+
+          if (canBack) {
+            webElement.back()
+            setTimeout(() => {
+              this.isBacking = false
+            }, 300)
+          } else {
+
+            router.back()
+          }
+        }
+      })
+      return true
+    }
+    
+    this.isBacking = false
+    return false
+  },
+
+  onPageStart() {
+  },
+
+  onPageFinish() {
+
+    const webElement = this.$element('web')
+    if (webElement && webElement.executeScript) {
+      try {
+        webElement.executeScript({
+          script: `
+          if (typeof process === 'undefined') {
+            window.process = {
+              env: {},
+              listenerCount: function() { return 0; },
+              on: function() {},
+              emit: function() {}
+            };
+          }
+          
+          var meta = document.createElement('meta');
+          meta.name = 'viewport';
+          meta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
+          if (!document.querySelector('meta[name="viewport"]')) {
+            document.head.appendChild(meta);
+          }
+        `
+        })
+      } catch (e) {
+
+      }
+    }
+  },
+
+  onDestroy() {
+
+  },
+
+  onError(evt) {
+
+  }
+}
+</script>
+
+<style>
+.webview-page {
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+
+.web-content {
+  width: 100%;
+  flex: 1;
+}
+</style>

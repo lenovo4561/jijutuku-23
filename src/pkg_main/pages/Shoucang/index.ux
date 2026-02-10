@@ -1,0 +1,294 @@
+<template>
+  <div class="page">
+    <list class="list-container">
+      <!-- 1. 顶部Header区域 -->
+      <list-item type="header" class="header-section">
+        <stack class="header-stack">
+          <!-- 顶部背景图 -->
+          <image class="header-bg" src="/assets/img/shoujibizhi-bg-5.png"></image>
+        </stack>
+      </list-item>
+
+      <!-- 2. 分类切换与管理按钮 -->
+      <list-item type="tabs" class="tabs-section">
+        <div class="tabs-left">
+          <div class="{{currentTab === 0 ? 'tab-item-active' : 'tab-item'}}" onclick="switchTab(0)">
+            <image class="tab-icon" src="{{currentTab === 0 ? '/assets/img/bz-u.png' : '/assets/img/bz-s.png'}}"></image>
+          </div>
+          <div class="{{currentTab === 1 ? 'tab-item-active' : 'tab-item'}}" onclick="switchTab(1)">
+            <image class="tab-icon" src="{{currentTab === 1 ? '/assets/img/tx-u.png' : '/assets/img/tx-s.png'}}"></image>
+          </div>
+        </div>
+        <div class="tabs-right" onclick="manage">
+          <image class="manage-icon" src="/assets/img/seting.png"></image>
+          <text class="manage-text">批量管理</text>
+        </div>
+      </list-item>
+
+      <!-- 3. 空状态 -->
+      <list-item type="empty" class="empty-section" if="{{displayData.length === 0}}">
+        <image class="empty-img" src="/assets/img/kong.png"></image>
+        <text class="empty-text">当前暂无收藏~</text>
+      </list-item>
+
+      <!-- 4. 列表展示 (如果有数据) -->
+      <list-item type="item" class="item-section" if="{{displayData.length > 0}}">
+        <div class="image-grid">
+          <div class="grid-item" for="{{displayData}}" onclick="onImageClick($item)">
+            <image class="{{currentTab === 0 ? 'image-wallpaper' : 'image-avatar'}}" src="{{$item.url}}"></image>
+          </div>
+        </div>
+      </list-item>
+    </list>
+  </div>
+</template>
+
+<script>
+import storage from '@system.storage'
+import router from '@system.router'
+
+export default {
+  data: {
+    currentTab: 0, // 0: 壁纸, 1: 头像
+    listData: [], // 所有收藏数据
+    displayData: [] // 当前显示的数据
+  },
+  onInit() {
+    console.log('Shoucang page initialized')
+    this.loadFavorites()
+  },
+  onShow() {
+    console.log('Shoucang page onShow')
+    this.loadFavorites()
+  },
+  loadFavorites() {
+    const self = this
+    storage.get({
+      key: 'favorites',
+      success: function(data) {
+        if (data) {
+          try {
+            self.listData = JSON.parse(data)
+            self.filterData()
+          } catch (e) {
+            console.error('解析收藏数据失败:', e)
+            self.listData = []
+            self.displayData = []
+          }
+        } else {
+          self.listData = []
+          self.displayData = []
+        }
+      },
+      fail: function() {
+        console.error('获取收藏数据失败')
+        self.listData = []
+        self.displayData = []
+      }
+    })
+  },
+  filterData() {
+    const type = this.currentTab === 0 ? 'wallpaper' : 'avatar'
+    this.displayData = this.listData.filter(function(item) {
+      return item.type === type
+    })
+  },
+  refresh() {
+    console.log('Shoucang page refresh')
+    this.loadFavorites()
+  },
+  switchTab(index) {
+    this.currentTab = index
+    this.filterData()
+  },
+  onImageClick(item) {
+    const targetPage = item.type === 'wallpaper' 
+      ? '/pkg_main/pages/Detail' 
+      : '/pkg_main/pages/AvatarDetail'
+    
+    router.push({
+      uri: targetPage,
+      params: {
+        imageUrl: item.url,
+        tag: item.tag
+      }
+    })
+  },
+  manage() {
+    if (this.displayData.length === 0) {
+      return
+    }
+    router.push({
+      uri: 'pkg_main/pages/ManageFavorites',
+      params: {
+        currentTab: this.currentTab
+      }
+    })
+  }
+}
+</script>
+
+<style>
+.page {
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  background-color: #ffffff;
+}
+
+.list-container {
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+}
+
+/* Header 样式 */
+.header-section {
+  width: 100%;
+  height: 120px;
+  flex-direction: column;
+  margin-bottom: -10px;
+}
+
+.header-stack {
+  width: 100%;
+  height: 100%;
+}
+
+.header-bg {
+  width: 100%;
+  height: 100%;
+  resize-mode: cover;
+  object-fit: cover;
+}
+
+/* Tabs 栏样式 */
+.tabs-section {
+  width: 100%;
+  padding: 10px 12px;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 5px;
+}
+
+.tabs-left {
+  flex-direction: row;
+  align-items: center;
+}
+
+.tab-item {
+  background-color: #f5f5f5;
+  padding: 5px 12px;
+  border-radius: 15px;
+  margin-right: 10px;
+  flex-direction: row;
+  align-items: center;
+  height: 28px;
+}
+
+.tab-item-active {
+  background-color: #ff3333;
+  padding: 5px 12px;
+  border-radius: 15px;
+  margin-right: 10px;
+  flex-direction: row;
+  align-items: center;
+  height: 28px;
+}
+
+.tab-text {
+  font-size: 11px;
+  color: #666666;
+}
+
+.tab-text-active {
+  font-size: 11px;
+  color: #ffffff;
+  font-weight: bold;
+}
+
+.tabs-right {
+  flex-direction: row;
+  align-items: center;
+}
+
+.tab-icon {
+  width: 30px;
+  height: 12px;
+  object-fit: contain;
+}
+
+.manage-icon {
+  width: 14px;
+  height: 14px;
+  margin-right: 4px;
+}
+
+.manage-text {
+  font-size: 11px;
+  color: #333333;
+}
+
+/* 空状态样式 */
+.empty-section {
+  width: 100%;
+  height: 400px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.empty-img {
+  width: 140px;
+  height: 140px;
+  object-fit: contain;
+}
+
+.empty-text {
+  font-size: 8px;
+  color: #999999;
+  margin-bottom: 120px;
+}
+
+/* 图片列表样式 */
+.item-section {
+  width: 100%;
+  padding: 0 12px;
+}
+
+.image-grid {
+  width: 100%;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.grid-item {
+  width: 48%;
+  margin-bottom: 12px;
+  flex-direction: column;
+  border-radius: 8px;
+}
+
+.image-wallpaper {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.image-avatar {
+  width: 100%;
+  height: 115px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.image-tag {
+  font-size: 9px;
+  color: #666666;
+  margin-top: 6px;
+  text-align: center;
+}
+</style>
