@@ -48,15 +48,15 @@
     "designWidth": 250
   },
   "router": {
-    "entry": "pages/Splash",
+    "entry": "pkg_main/pages/Main",
     "pages": {
-      "pages/Splash": {
+      "pkg_main/pages/Splash": {
         "component": "index"
       },
-      "pages/Demo": {
+      "pkg_main/pages/Demo": {
         "component": "index"
       },
-      "pages/DemoDetail": {
+      "pkg_main/pages/DemoDetail": {
         "component": "index"
       },
       "pkg_main/pages/Main": {
@@ -99,14 +99,14 @@
     "titleBarTextColor": "#414141",
     "menu": true,
     "pages": {
-      "pages/Splash": {
+      "pkg_main/pages/Splash": {
         "titleBar": false
       },
-      "pages/Demo": {
+      "pkg_main/pages/Demo": {
         "titleBarText": "快应用示例模版",
         "menu": false
       },
-      "pages/DemoDetail": {
+      "pkg_main/pages/DemoDetail": {
         "titleBarText": "详情页"
       },
       "pkg_main/pages/Main": {

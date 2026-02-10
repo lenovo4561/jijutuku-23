@@ -63,6 +63,7 @@
 import device from '@system.device'
 import app from '@system.app'
 import storage from '@system.storage'
+import router from '@system.router'
 
 export default {
   private: {
@@ -70,11 +71,32 @@ export default {
   },
   onInit() {
     console.log('Main page initialized')
+    // 检查是否首次启动，如果是则跳转到 Splash 页面
+    this.checkFirstLaunch()
     if (this.tabIndex !== undefined && this.tabIndex !== null) {
       this.currentIndex = parseInt(this.tabIndex)
       console.log('Main page - switch to tab:', this.currentIndex)
     }
     this.initUser()
+  },
+  checkFirstLaunch() {
+    storage.get({
+      key: 'hasAgreedPrivacy',
+      success: data => {
+        if (data !== 'true') {
+          // 未同意隐私协议，跳转到 Splash 页面
+          router.replace({
+            uri: '/pkg_main/pages/Splash'
+          })
+        }
+      },
+      fail: () => {
+        // 首次启动，跳转到 Splash 页面
+        router.replace({
+          uri: '/pkg_main/pages/Splash'
+        })
+      }
+    })
   },
   onShow() {
     console.log('Main page onShow')

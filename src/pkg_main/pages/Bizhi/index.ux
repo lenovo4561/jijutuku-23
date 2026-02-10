@@ -5,7 +5,7 @@
       <list-item type="header" class="header-section">
         <stack class="header-stack">
           <!-- 顶部背景图 -->
-          <image class="header-bg" src="/assets/img/shoujibizhi-bg-1.png"></image>
+          <image class="header-bg" src="../../assets/img/shoujibizhi-bg-1.png"></image>
         </stack>
       </list-item>
 
@@ -154,7 +154,7 @@ export default {
   height: 60px;
   flex-direction: row;
   align-items: center;
-  margin-top: 0px;
+  margin-top: 5px;
 }
 
 .category-scroll {
@@ -215,7 +215,7 @@ export default {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 0px;
-  margin-top:-20px
+  margin-top:-35px
 }
 
 .rank-left {

@@ -5,7 +5,7 @@
       <list-item type="header" class="header-section">
         <stack class="header-stack">
           <!-- 顶部背景图 -->
-          <image class="header-bg" src="/assets/img/shoujibizhi-bg-5.png"></image>
+          <image class="header-bg" src="../../assets/img/shoujibizhi-bg-5.png"></image>
         </stack>
       </list-item>
 
@@ -13,21 +13,21 @@
       <list-item type="tabs" class="tabs-section">
         <div class="tabs-left">
           <div class="{{currentTab === 0 ? 'tab-item-active' : 'tab-item'}}" onclick="switchTab(0)">
-            <image class="tab-icon" src="{{currentTab === 0 ? '/assets/img/bz-u.png' : '/assets/img/bz-s.png'}}"></image>
+            <image class="tab-icon" src="{{currentTab === 0 ? '../../assets/img/bz-u.png' : '../../assets/img/bz-s.png'}}"></image>
           </div>
           <div class="{{currentTab === 1 ? 'tab-item-active' : 'tab-item'}}" onclick="switchTab(1)">
-            <image class="tab-icon" src="{{currentTab === 1 ? '/assets/img/tx-u.png' : '/assets/img/tx-s.png'}}"></image>
+            <image class="tab-icon" src="{{currentTab === 1 ? '../../assets/img/tx-u.png' : '../../assets/img/tx-s.png'}}"></image>
           </div>
         </div>
         <div class="tabs-right" onclick="manage">
-          <image class="manage-icon" src="/assets/img/seting.png"></image>
+          <image class="manage-icon" src="../../assets/img/seting.png"></image>
           <text class="manage-text">批量管理</text>
         </div>
       </list-item>
 
       <!-- 3. 空状态 -->
       <list-item type="empty" class="empty-section" if="{{displayData.length === 0}}">
-        <image class="empty-img" src="/assets/img/kong.png"></image>
+        <image class="empty-img" src="../../assets/img/kong.png"></image>
         <text class="empty-text">当前暂无收藏~</text>
       </list-item>
 

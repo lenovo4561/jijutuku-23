@@ -4,10 +4,10 @@
       <!-- 管理模式头部 -->
       <list-item type="header" class="header-item">
         <stack class="manage-header">
-          <image class="manage-header-bg" src="/assets/img/shoujibizhi-bg-2.png"></image>
+          <image class="manage-header-bg" src="../../assets/img/shoujibizhi-bg-2.png"></image>
           <div class="manage-header-content">
             <div class="back-btn" onclick="goBack">
-              <image class="back-icon" src="/assets/img/back.png"></image>
+              <image class="back-icon" src="../../assets/img/back.png"></image>
             </div>
             <text class="manage-title">批量管理</text>
             <text class="manage-count">已选择 {{selectedCount}} 张</text>
@@ -21,7 +21,7 @@
           <div class="grid-item" for="{{displayData}}" onclick="onImageClick($idx, $item)">
             <stack class="item-stack">
               <image class="{{tabIndex === 0 ? 'image-wallpaper' : 'image-avatar'}}" src="{{$item.url}}"></image>
-              <image class="select-icon" src="{{$item.selected ? '/assets/img/xuanze.png' : '/assets/img/weixuanze.png'}}"></image>
+              <image class="select-icon" src="{{$item.selected ? '../../assets/img/xuanze.png' : '../../assets/img/weixuanze.png'}}"></image>
             </stack>
           </div>
         </div>
@@ -34,7 +34,7 @@
     <!-- 底部批量取消按钮 -->
     <div class="bottom-bar">
       <div class="delete-btn" onclick="onDeleteClick">
-        <image class="delete-icon" src="/assets/img/shanchu.png"></image>
+        <image class="delete-icon" src="../../assets/img/shanchu.png"></image>
         <text class="delete-text">取消收藏</text>
       </div>
     </div>

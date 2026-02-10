@@ -1,15 +1,15 @@
 <template>
   <div class="splash-container">
     <!-- 背景图 -->
-    <image class="bg-img" src="/assets/img/loading-bg.png"></image>
+    <image class="bg-img" src="../../assets/img/loading-bg.png"></image>
     
     <!-- 中间Logo -->
     <div class="logo-container">
-      <image class="logo" src="/assets/img/logo.png"></image>
+      <image class="logo" src="../../assets/img/logo.png"></image>
     </div>
     
     <!-- 底部卡通背景 -->
-    <image class="bottom-bg" src="/assets/img/loading_di.png"></image>
+    <image class="bottom-bg" src="../../assets/img/loading_di.png"></image>
 
     <!-- 隐私协议弹窗 -->
     <div class="modal_overlay" if="{{showModal}}">

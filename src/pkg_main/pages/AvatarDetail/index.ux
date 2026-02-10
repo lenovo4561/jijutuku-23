@@ -11,20 +11,20 @@
 
       <!-- 顶部返回按钮 -->
       <div class="back-btn" onclick="goBack">
-        <image class="back-icon" src="/assets/img/back.png"></image>
+        <image class="back-icon" src="../../assets/img/back.png"></image>
       </div>
 
       <!-- 底部操作栏-->
       <div class="bottom-bar">
         <!-- 下载按钮 -->
         <div class="action-btn download-btn" onclick="handleDownload">
-          <image class="btn-icon" src="/assets/img/xiazai.png"></image>
+          <image class="btn-icon" src="../../assets/img/xiazai.png"></image>
           <text class="btn-text">下载</text>
         </div>
         
         <!-- 收藏按钮 -->
         <div class="action-btn like-btn" onclick="handleLike">
-          <image class="btn-icon" src="{{isLiked ? '/assets/img/like-s.png' : '/assets/img/like-u.png'}}"></image>
+          <image class="btn-icon" src="{{isLiked ? '../../assets/img/like-s.png' : '../../assets/img/like-u.png'}}"></image>
           <text class="btn-text">{{isLiked ? '已收藏' : '收藏'}}</text>
         </div>
       </div>

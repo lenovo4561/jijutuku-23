@@ -2,11 +2,11 @@
   <div class="page">
     <!-- 顶部背景区域 -->
     <stack class="header-section">
-      <image class="top-bg-back" src="/assets/img/shoujibizhi-bg.png"></image>
+      <image class="top-bg-back" src="../../assets/img/shoujibizhi-bg.png"></image>
       
       <!-- 用户信息 -->
       <div class="user-section">
-        <image class="avatar" src="/assets/img/tx.png"></image>
+        <image class="avatar" src="../../assets/img/tx.png"></image>
         <text class="username">冯思钦</text>
       </div>
     </stack>
@@ -18,12 +18,12 @@
       <div class="menu-item" onclick="openAgreement">
         <image
           class="menu-icon"
-          src="/assets/img/yonghuxieyi.png"
+          src="../../assets/img/yonghuxieyi.png"
         ></image>
         <text class="menu-text">用户协议</text>
         <image
           class="arrow-icon"
-          src="/assets/img/jiantou.png"
+          src="../../assets/img/jiantou.png"
         ></image>
       </div>
 
@@ -32,12 +32,12 @@
       <div class="menu-item" onclick="openPrivacy">
         <image
           class="menu-icon"
-          src="/assets/img/yinsizhengce-1.png"
+          src="../../assets/img/yinsizhengce-1.png"
         ></image>
         <text class="menu-text">隐私政策</text>
         <image
           class="arrow-icon"
-          src="/assets/img/jiantou.png"
+          src="../../assets/img/jiantou.png"
         ></image>
       </div>
     </div>
