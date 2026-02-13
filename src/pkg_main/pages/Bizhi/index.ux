@@ -57,11 +57,11 @@ export default {
     currentCat: 0,
     sortType: 'newest',
     categories: [
-      { icon: '🔥', name: '精选', folder: 'cnxh' },
-      { icon: '🚗', name: '动漫', folder: 'cnxh' },
-      { icon: '👫', name: '人物', folder: 'cnxh' },
-      { icon: '🐱', name: '萌宠', folder: 'cnxh' },
-      { icon: '🌲', name: '自然', folder: 'cnxh' }
+      { icon: '🔥', name: '精选', folder: 'jx' },
+      { icon: '🚗', name: '动漫', folder: 'dm' },
+      { icon: '👫', name: '人物', folder: 'rw' },
+      { icon: '🐱', name: '萌宠', folder: 'mc' },
+      { icon: '🌲', name: '自然', folder: 'zr' }
     ],
     wallpaperList: [],
     wallpaperRows: []
@@ -72,15 +72,20 @@ export default {
   },
   loadWallpapers() {
     const folder = this.categories[this.currentCat].folder
-    const baseUrl = `https://cdn.shijinzhuang.com/quick/lecuntk/bz/${folder}/`
+    const baseUrl = `https://cdn.shijinzhuang.com/quick/jijutk/bz/${folder}/`
     
-    // 生成1-24的壁纸列表
+    // 生成1-20的壁纸列表
     this.wallpaperList = []
-    for (let i = 1; i <= 24; i++) {
+    for (let i = 1; i <= 20; i++) {
       this.wallpaperList.push({
         id: i,
         url: `${baseUrl}${i}.jpg`
       })
+    }
+
+    // 如果是“最热”，随机打乱顺序
+    if (this.sortType === 'hottest') {
+      this.wallpaperList.sort(() => Math.random() - 0.5)
     }
     
     // 转换为双列布局
